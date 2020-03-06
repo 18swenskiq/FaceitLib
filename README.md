@@ -1,5 +1,5 @@
 # FaceitLib
-A C# Library for using Faceit.com's Data API v4
+A C# Library for using Faceit.com's Data API v4 [Nuget](https://www.nuget.org/packages/FaceitLib/1.0.0).
 
 # Notes
 Frequently, endpoints will just return a 503 response. Its important to check for your object either being null
