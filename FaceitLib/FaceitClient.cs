@@ -3,7 +3,10 @@ using FaceitLib.Models.ClassObjectLists;
 using FaceitLib.Models.SearchResults;
 using FaceitLib.Models.Shared;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FaceitLib
@@ -806,5 +809,146 @@ namespace FaceitLib
             var teams = await MakeGETRequest<TournamentTeams>(builtURL);
             return teams;
         }
+
+
+        /// <summary>
+        /// Get all the matches in a hub between two dates (inclusive)
+        /// </summary>
+        /// <param name="hub_id">Id of the hub</param>
+        /// <param name="FromDate">DateTime to get matches from (first date)</param>
+        /// <param name="ToDate">DateTime to get matches to (second date)</param>
+        /// <param name="OptionalLimit">Define your own limit for the API call (higher numbers may cause more frequent 503 issues)</param>
+        /// <returns></returns>
+        public async Task<List<MatchesListObject>> GetMatchesFromHubBetweenDates(string hub_id, DateTime FromDate, DateTime ToDate, int OptionalLimit = 20)
+        {
+            int currentoffset = 0;
+
+            List<MatchesListObject> ReturnMatches = new List<MatchesListObject>();
+
+            bool KeepLoop = true;
+
+            while (KeepLoop)
+            {
+                var Matches = await GetHubMatches(hub_id, "past", currentoffset, OptionalLimit);
+
+                if (_statuscode == HttpStatusCode.ServiceUnavailable)
+                {
+                    Thread.Sleep(5000); 
+                    continue; // If we get a bad response from Faceit let's just retry after waiting 5 seconds
+                }
+                if (_statuscode != HttpStatusCode.OK)
+                {
+                    return null;
+                }
+
+                List<MatchesListObject> MatchesFromAPICall = Matches.Items;
+
+                // Reverse the list to give us the *correct* order
+                MatchesFromAPICall = Enumerable.Reverse(MatchesFromAPICall).ToList();
+
+
+                foreach(var item in MatchesFromAPICall)
+                {
+
+                    if(item.Status.ToLower() == "CANCELLED".ToLower())
+                    {
+                        // This match was cancelled so skip it
+                        continue;
+                    }
+
+                    // Get current DateTime
+                    DateTime CurrentMatchDateTime = new DateTime(1970, 1, 1).AddSeconds(item.ScheduledAt);
+
+                    if(CurrentMatchDateTime > ToDate)
+                    {
+                        // If this match takes place after we want then skip it
+                        continue;
+                    }
+
+                    if(FromDate > CurrentMatchDateTime)
+                    {
+                        // If we've gotten to the point where we're getting matches before 
+                        KeepLoop = false;
+                        continue;
+                    }
+
+                    // Put matches in our object
+                    ReturnMatches.Add(item);
+                }
+            }
+
+            return ReturnMatches;
+        }
+
+        /// <summary>
+        /// Get all the matches in a championship between two dates (inclusive)
+        /// </summary>
+        /// <param name="championship_id">ID of the championship</param>
+        /// <param name="FromDate">DateTime to get matches from (first date)</param>
+        /// <param name="ToDate">DateTime to get matches to (second date)</param>
+        /// <param name="OptionalLimit">Define your own limit for the API call (higher numbers may cause more frequent 503 issues)</param>
+        /// <returns></returns>
+        public async Task<List<MatchesListObject>> GetMatchesFromChampionshipBetweenDates(string championship_id, DateTime FromDate, DateTime ToDate, int OptionalLimit = 20)
+        {
+            int currentoffset = 0;
+
+            List<MatchesListObject> ReturnMatches = new List<MatchesListObject>();
+
+            bool KeepLoop = true;
+
+            while (KeepLoop)
+            {
+                var Matches = await GetChampionshipMatches(championship_id, "past", currentoffset, OptionalLimit);
+
+                if (_statuscode == HttpStatusCode.ServiceUnavailable)
+                {
+                    Thread.Sleep(5000);
+                    continue; // If we get a bad response from Faceit let's just retry after waiting 5 seconds
+                }
+                if (_statuscode != HttpStatusCode.OK)
+                {
+                    // If we get a bad code like Unauthorized or something just yeet out
+                    return null;
+                }
+
+                List<MatchesListObject> MatchesFromAPICall = Matches.Items;
+
+                // Reverse the list to give us the *correct* order
+                MatchesFromAPICall = Enumerable.Reverse(MatchesFromAPICall).ToList();
+
+
+                foreach (var item in MatchesFromAPICall)
+                {
+
+                    if (item.Status.ToLower() == "CANCELLED".ToLower())
+                    {
+                        // This match was cancelled so skip it
+                        continue;
+                    }
+
+                    // Get current DateTime
+                    DateTime CurrentMatchDateTime = new DateTime(1970, 1, 1).AddSeconds(item.ScheduledAt);
+
+                    if (CurrentMatchDateTime > ToDate)
+                    {
+                        // If this match takes place after we want then skip it
+                        continue;
+                    }
+
+                    if (FromDate > CurrentMatchDateTime)
+                    {
+                        // If we've gotten to the point where we're getting matches before 
+                        KeepLoop = false;
+                        continue;
+                    }
+
+                    // Put matches in our object
+                    ReturnMatches.Add(item);
+                }
+            }
+
+            return ReturnMatches;
+        }
+
     }
 }
