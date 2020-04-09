@@ -831,6 +831,13 @@ namespace FaceitLib
             {
                 var Matches = await GetHubMatches(hub_id, "past", currentoffset, OptionalLimit);
 
+                if (Matches.Items.Count == 0)
+                {
+                    // If we're out of matches then leave and return what we got
+                    KeepLoop = false;
+                    continue;
+                }
+
                 if (_statuscode == HttpStatusCode.ServiceUnavailable)
                 {
                     Thread.Sleep(5000); 
@@ -857,7 +864,7 @@ namespace FaceitLib
                     }
 
                     // Get current DateTime
-                    DateTime CurrentMatchDateTime = new DateTime(1970, 1, 1).AddSeconds(item.ScheduledAt);
+                    DateTime CurrentMatchDateTime = new DateTime(1970, 1, 1).AddSeconds(item.FinishedAt);
 
                     if(CurrentMatchDateTime > ToDate)
                     {
@@ -875,6 +882,7 @@ namespace FaceitLib
                     // Put matches in our object
                     ReturnMatches.Add(item);
                 }
+                currentoffset += OptionalLimit;
             }
 
             return ReturnMatches;
@@ -899,6 +907,14 @@ namespace FaceitLib
             while (KeepLoop)
             {
                 var Matches = await GetChampionshipMatches(championship_id, "past", currentoffset, OptionalLimit);
+
+                if(Matches.Items.Count == 0)
+                {
+                    // If we're out of matches then leave and return what we got
+                    KeepLoop = false;
+                    continue;
+                }
+
 
                 if (_statuscode == HttpStatusCode.ServiceUnavailable)
                 {
@@ -927,7 +943,7 @@ namespace FaceitLib
                     }
 
                     // Get current DateTime
-                    DateTime CurrentMatchDateTime = new DateTime(1970, 1, 1).AddSeconds(item.ScheduledAt);
+                    DateTime CurrentMatchDateTime = new DateTime(1970, 1, 1).AddSeconds(item.FinishedAt);
 
                     if (CurrentMatchDateTime > ToDate)
                     {
@@ -945,6 +961,7 @@ namespace FaceitLib
                     // Put matches in our object
                     ReturnMatches.Add(item);
                 }
+                currentoffset += OptionalLimit;
             }
 
             return ReturnMatches;
