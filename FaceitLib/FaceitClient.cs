@@ -866,7 +866,7 @@ namespace FaceitLib
                     // Get current DateTime
                     DateTime CurrentMatchDateTime = new DateTime(1970, 1, 1).AddSeconds(item.FinishedAt);
 
-                    if(CurrentMatchDateTime > ToDate)
+                    if(CurrentMatchDateTime > ToDate.AddDays(1))
                     {
                         // If this match takes place after we want then skip it
                         continue;
@@ -945,7 +945,7 @@ namespace FaceitLib
                     // Get current DateTime
                     DateTime CurrentMatchDateTime = new DateTime(1970, 1, 1).AddSeconds(item.FinishedAt);
 
-                    if (CurrentMatchDateTime > ToDate)
+                    if (CurrentMatchDateTime > ToDate.AddDays(1))
                     {
                         // If this match takes place after we want then skip it
                         continue;
