@@ -831,13 +831,6 @@ namespace FaceitLib
             {
                 var Matches = await GetHubMatches(hub_id, "past", currentoffset, OptionalLimit);
 
-                if (Matches.Items.Count == 0)
-                {
-                    // If we're out of matches then leave and return what we got
-                    KeepLoop = false;
-                    continue;
-                }
-
                 if (_statuscode == HttpStatusCode.ServiceUnavailable)
                 {
                     Thread.Sleep(5000); 
@@ -846,6 +839,13 @@ namespace FaceitLib
                 if (_statuscode != HttpStatusCode.OK)
                 {
                     return null;
+                }
+
+                if (Matches.Items.Count == 0)
+                {
+                    // If we're out of matches then leave and return what we got
+                    KeepLoop = false;
+                    continue;
                 }
 
                 List<MatchesListObject> MatchesFromAPICall = Matches.Items;
@@ -872,7 +872,7 @@ namespace FaceitLib
                         continue;
                     }
 
-                    if(FromDate > CurrentMatchDateTime)
+                    if(CurrentMatchDateTime < FromDate)
                     {
                         // If we've gotten to the point where we're getting matches before 
                         KeepLoop = false;
@@ -908,14 +908,6 @@ namespace FaceitLib
             {
                 var Matches = await GetChampionshipMatches(championship_id, "past", currentoffset, OptionalLimit);
 
-                if(Matches.Items.Count == 0)
-                {
-                    // If we're out of matches then leave and return what we got
-                    KeepLoop = false;
-                    continue;
-                }
-
-
                 if (_statuscode == HttpStatusCode.ServiceUnavailable)
                 {
                     Thread.Sleep(5000);
@@ -926,6 +918,14 @@ namespace FaceitLib
                     // If we get a bad code like Unauthorized or something just yeet out
                     return null;
                 }
+
+                if (Matches.Items.Count == 0)
+                {
+                    // If we're out of matches then leave and return what we got
+                    KeepLoop = false;
+                    continue;
+                }
+
 
                 List<MatchesListObject> MatchesFromAPICall = Matches.Items;
 
@@ -951,7 +951,7 @@ namespace FaceitLib
                         continue;
                     }
 
-                    if (FromDate > CurrentMatchDateTime)
+                    if (CurrentMatchDateTime < FromDate)
                     {
                         // If we've gotten to the point where we're getting matches before 
                         KeepLoop = false;
