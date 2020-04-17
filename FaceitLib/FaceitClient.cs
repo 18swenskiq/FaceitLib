@@ -818,14 +818,16 @@ namespace FaceitLib
         /// <param name="FromDate">DateTime to get matches from (first date)</param>
         /// <param name="ToDate">DateTime to get matches to (second date)</param>
         /// <param name="OptionalLimit">Define your own limit for the API call (higher numbers may cause more frequent 503 issues)</param>
+        /// <param name="retrymax">The number of times to retry calling the API after a 503</param>
         /// <returns></returns>
-        public async Task<List<MatchesListObject>> GetMatchesFromHubBetweenDates(string hub_id, DateTime FromDate, DateTime ToDate, int OptionalLimit = 20)
+        public async Task<List<MatchesListObject>> GetMatchesFromHubBetweenDates(string hub_id, DateTime FromDate, DateTime ToDate, int OptionalLimit = 20, int RetryMax = 5)
         {
             int currentoffset = 0;
 
             List<MatchesListObject> ReturnMatches = new List<MatchesListObject>();
 
             bool KeepLoop = true;
+            int NumRetries = 0;
 
             while (KeepLoop)
             {
@@ -833,7 +835,9 @@ namespace FaceitLib
 
                 if (_statuscode == HttpStatusCode.ServiceUnavailable)
                 {
-                    Thread.Sleep(5000); 
+                    if (NumRetries == RetryMax) return ReturnMatches;
+                    NumRetries++;
+                    await Task.Delay(5000);
                     continue; // If we get a bad response from Faceit let's just retry after waiting 5 seconds
                 }
                 if (_statuscode != HttpStatusCode.OK)
@@ -896,7 +900,7 @@ namespace FaceitLib
         /// <param name="ToDate">DateTime to get matches to (second date)</param>
         /// <param name="OptionalLimit">Define your own limit for the API call (higher numbers may cause more frequent 503 issues)</param>
         /// <returns></returns>
-        public async Task<List<MatchesListObject>> GetMatchesFromChampionshipBetweenDates(string championship_id, DateTime FromDate, DateTime ToDate, int OptionalLimit = 20)
+        public async Task<List<MatchesListObject>> GetMatchesFromChampionshipBetweenDates(string championship_id, DateTime FromDate, DateTime ToDate, int OptionalLimit = 20, int RetryMax = 5)
         {
             int currentoffset = 0;
 
@@ -904,13 +908,17 @@ namespace FaceitLib
 
             bool KeepLoop = true;
 
+            int NumRetries = 0;
+
             while (KeepLoop)
             {
                 var Matches = await GetChampionshipMatches(championship_id, "past", currentoffset, OptionalLimit);
 
                 if (_statuscode == HttpStatusCode.ServiceUnavailable)
                 {
-                    Thread.Sleep(5000);
+                    if (NumRetries == RetryMax) return ReturnMatches;
+                    NumRetries++;
+                    await Task.Delay(5000);
                     continue; // If we get a bad response from Faceit let's just retry after waiting 5 seconds
                 }
                 if (_statuscode != HttpStatusCode.OK)
