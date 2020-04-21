@@ -53,7 +53,7 @@ namespace FaceitLib.Models.ClassObjectLists
         public int Season { get; set; }
 
         [JsonProperty(PropertyName = "start_date")]
-        public int StartDate { get; set; }
+        public Int64 StartDate { get; set; }
 
         [JsonProperty(PropertyName = "starting_points")]
         public int StartingPoints { get; set; }
