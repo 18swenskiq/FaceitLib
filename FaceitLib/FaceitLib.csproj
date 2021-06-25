@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <Authors>Quinton Swenski</Authors>
     <Company />
     <Product>FaceitLib C# Library</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>A library to interact with Faceit.com's public Data API (Version 4)</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>1.0.6</Version>
+    <Version>1.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
